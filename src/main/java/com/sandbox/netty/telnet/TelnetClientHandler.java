@@ -1,18 +1,19 @@
-package com.sandbox.netty.chap02;
+package com.sandbox.netty.telnet;
 
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 /**
  * Author: zhangxin
- * Date:   15-9-28
+ * Date:   15-9-29
  */
-public class EchoClientHandlerV1 extends SimpleChannelInboundHandler<Object> {
+@ChannelHandler.Sharable
+public class TelnetClientHandler extends SimpleChannelInboundHandler<String> {
 
     @Override
-    public void messageReceived(ChannelHandlerContext ctx, Object msg) {
-        System.out.println("===========");
-        System.out.println(msg);
+    protected void messageReceived(ChannelHandlerContext ctx, String msg) {
+        System.err.println(msg);
     }
 
     @Override

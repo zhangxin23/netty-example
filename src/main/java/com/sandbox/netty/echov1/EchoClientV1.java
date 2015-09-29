@@ -1,4 +1,4 @@
-package com.sandbox.netty.chap01;
+package com.sandbox.netty.echov1;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -15,10 +15,9 @@ import java.io.InputStreamReader;
  * Author: zhangxin
  * Date:   15-9-28
  */
-public final class EchoClient {
+public class EchoClientV1 {
     static final String HOST = System.getProperty("host", "127.0.0.1");
     static final int PORT = Integer.parseInt(System.getProperty("port", "8007"));
-    static final int SIZE = Integer.parseInt(System.getProperty("size", "256"));
 
     public static void main(String[] args) throws Exception {
         EventLoopGroup group = new NioEventLoopGroup();
@@ -27,27 +26,29 @@ public final class EchoClient {
             b.group(group)
                     .channel(NioSocketChannel.class)
                     .option(ChannelOption.TCP_NODELAY, true)
-                    .handler(new ChannelInitializer<SocketChannel>(){
+                    .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
                             ChannelPipeline p = ch.pipeline();
-                            p.addLast(new EchoClientHandler());
+                            p.addLast(new EchoClientHandlerV1());
                         }
                     });
-            ChannelFuture f = b.connect(HOST, PORT).sync();
 
-            String input = "";
+            Channel ch = b.connect(HOST, PORT).sync().channel();
+            ChannelFuture lastWriteFuture = null;
+            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             while(true) {
-                BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-                input = br.readLine();
-                if(input.equals("quit"))
+                String line = in.readLine();
+                if(line == null || line.equalsIgnoreCase("quit"))
                     break;
-                ByteBuf sendBuf = Unpooled.buffer(SIZE);
-                sendBuf.writeBytes(input.getBytes());
-                f.channel().writeAndFlush(sendBuf);
+                ByteBuf byteBuf = Unpooled.buffer(256);
+                byteBuf.writeBytes(line.getBytes());
+                lastWriteFuture = ch.writeAndFlush(byteBuf);
             }
 
-            f.channel().closeFuture().sync();
+            if(lastWriteFuture != null) {
+                lastWriteFuture.awaitUninterruptibly();
+            }
         } finally {
             group.shutdownGracefully();
         }

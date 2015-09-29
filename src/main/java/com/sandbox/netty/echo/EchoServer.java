@@ -1,4 +1,4 @@
-package com.sandbox.netty.chap02;
+package com.sandbox.netty.echo;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -12,11 +12,11 @@ import io.netty.handler.logging.LoggingHandler;
  * Author: zhangxin
  * Date:   15-9-28
  */
-public class EchoServerV1 {
+public final class EchoServer {
     static final int PORT = Integer.parseInt(System.getProperty("port", "8007"));
 
-    public static void main(String[] args) {
-        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+    public static void main(String[] args) throws Exception {
+        EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap b = new ServerBootstrap();
@@ -28,15 +28,15 @@ public class EchoServerV1 {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
                             ChannelPipeline p = ch.pipeline();
-                            p.addLast(new EchoServerHandlerV1());
+                            p.addLast(new EchoServerHandler());
                         }
                     });
+
             ChannelFuture f = b.bind(PORT).sync();
             f.channel().closeFuture().sync();
-        } catch (Exception e) {
-            e.printStackTrace();
         } finally {
             bossGroup.shutdownGracefully();
+            workerGroup.shutdownGracefully();
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.sandbox.netty.chap02;
+package com.sandbox.netty.echov1;
 
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
